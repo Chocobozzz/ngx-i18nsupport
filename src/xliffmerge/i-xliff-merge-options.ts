@@ -45,11 +45,5 @@ export interface IXliffMergeOptions {
     targetSuffix?: string; // Suffix for target copied from sourced
     beautifyOutput?: boolean; // beautify output
     preserveOrder?: boolean; // preserve order of new trans units
-    autotranslate?: boolean|string[]; // enable auto translate via Google Translate
-        // if it is an array, list of languages to autotranslate
-        // if it is true, autotranslate all languages (except source language of course)
-        // if it is false (default) no autotranslate
-    apikey?: string;    // API Key for Google Translate, required if autotranslate is enabled
-    apikeyfile?: string;    // file name where API Key for Google Translate can be read from
 }
 

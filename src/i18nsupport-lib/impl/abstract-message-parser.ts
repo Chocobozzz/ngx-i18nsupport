@@ -5,7 +5,7 @@ import {
     Token
 } from './parsed-message-tokenizer';
 import {ParsedMessagePartText} from './parsed-message-part-text';
-import {DOMParser} from 'xmldom';
+import {DOMParser} from '@xmldom/xmldom';
 import {ParsedMessagePartStartTag} from './parsed-message-part-start-tag';
 import {ParsedMessagePartPlaceholder} from './parsed-message-part-placeholder';
 import {ParsedMessagePartEndTag} from './parsed-message-part-end-tag';

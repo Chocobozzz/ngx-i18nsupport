@@ -3,7 +3,7 @@ import {ITranslationMessagesFile} from '../api/i-translation-messages-file';
 import {INormalizedMessage} from '../api/i-normalized-message';
 import {ITransUnit} from '../api/i-trans-unit';
 import {isNullOrUndefined} from 'util';
-import {DOMParser} from 'xmldom';
+import {DOMParser} from '@xmldom/xmldom';
 import {XmlSerializer, XmlSerializerOptions} from './xml-serializer';
 /**
  * Created by roobm on 09.05.2017.

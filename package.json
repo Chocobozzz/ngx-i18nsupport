@@ -27,12 +27,10 @@
   },
   "homepage": "https://github.com/Chocobozzz/ngx-i18nsupport#readme",
   "dependencies": {
+    "@xmldom/xmldom": "^0.8.7",
     "chalk": "^2.4.1",
     "he": "^1.2.0",
-    "request": "^2.88.2",
-    "rxjs": "^7.4.0",
-    "tokenizr": "^1.6.4",
-    "xmldom": "^0.6.0"
+    "tokenizr": "^1.6.4"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",

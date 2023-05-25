@@ -39,7 +39,6 @@ export class XliffMergeParameters {
     private _targetSuffix: string;
     private _beautifyOutput: boolean;
     private _preserveOrder: boolean;
-    private _autotranslate: boolean|string[];
     private _apikey: string;
     private _apikeyfile: string;
 
@@ -145,7 +144,6 @@ export class XliffMergeParameters {
         const xliffmergeOptions = profileContent.xliffmergeOptions;
         xliffmergeOptions.srcDir = this.adjustPathToProfilePath(profilePath, xliffmergeOptions.srcDir);
         xliffmergeOptions.genDir = this.adjustPathToProfilePath(profilePath, xliffmergeOptions.genDir);
-        xliffmergeOptions.apikeyfile = this.adjustPathToProfilePath(profilePath, xliffmergeOptions.apikeyfile);
         return profileContent;
     }
 
@@ -219,20 +217,11 @@ export class XliffMergeParameters {
             if (!isNullOrUndefined(profile.targetSuffix)) {
                 this._targetSuffix = profile.targetSuffix;
             }
-            if (!isNullOrUndefined(profile.autotranslate)) {
-                this._autotranslate = profile.autotranslate;
-            }
             if (!isNullOrUndefined(profile.beautifyOutput)) {
                 this._beautifyOutput = profile.beautifyOutput;
             }
             if (!isNullOrUndefined(profile.preserveOrder)) {
                 this._preserveOrder = profile.preserveOrder;
-            }
-            if (!isNullOrUndefined(profile.apikey)) {
-                this._apikey = profile.apikey;
-            }
-            if (!isNullOrUndefined(profile.apikeyfile)) {
-                this._apikeyfile = profile.apikeyfile;
             }
         } else {
             this.warningsFound.push('did not find "xliffmergeOptions" in profile, using defaults');
@@ -281,20 +270,6 @@ export class XliffMergeParameters {
         if (!(this.i18nFormat() === 'xlf' || this.i18nFormat() === 'xlf2' || this.i18nFormat() === 'xmb')) {
             this.errorsFound.push(new XliffMergeError('i18nFormat "' + this.i18nFormat() + '" invalid, must be "xlf" or "xlf2" or "xmb"'));
         }
-        // autotranslate requires api key
-        if (this.autotranslate() && !this.apikey()) {
-            this.errorsFound.push(new XliffMergeError('autotranslate requires an API key, please set one'));
-        }
-        // autotranslated languages must be in list of all languages
-        this.autotranslatedLanguages().forEach((lang) => {
-            if (this.languages().indexOf(lang) < 0) {
-                this.errorsFound.push(new XliffMergeError('autotranslate language "' + lang + '" is not in list of languages'));
-            }
-            if (lang === this.defaultLanguage()) {
-                this.errorsFound.push(
-                    new XliffMergeError('autotranslate language "' + lang + '" cannot be translated, because it is the source language'));
-            }
-        });
         // ngx translate pattern check
         if (this.supportNgxTranslate()) {
             const checkResult = NgxTranslateExtractor.checkPattern(this.ngxTranslateExtractionPattern());
@@ -369,12 +344,6 @@ export class XliffMergeParameters {
         commandOutput.debug('allowIdChange:\t%s', this.allowIdChange());
         commandOutput.debug('beautifyOutput:\t%s', this.beautifyOutput());
         commandOutput.debug('preserveOrder:\t%s', this.preserveOrder());
-        commandOutput.debug('autotranslate:\t%s', this.autotranslate());
-        if (this.autotranslate()) {
-            commandOutput.debug('autotranslated languages:\t%s', this.autotranslatedLanguages());
-            commandOutput.debug('apikey:\t%s', this.apikey() ? '****' : 'NOT SET');
-            commandOutput.debug('apikeyfile:\t%s', this.apikeyfile());
-        }
     }
 
     /**
@@ -525,76 +494,5 @@ export class XliffMergeParameters {
      */
     public preserveOrder(): boolean {
         return (isNullOrUndefined(this._preserveOrder)) ? true : this._preserveOrder;
-    }
-
-    /**
-     * Whether to use autotranslate for new trans-units
-     * Default is false
-     */
-    public autotranslate(): boolean {
-        if (isNullOrUndefined(this._autotranslate)) {
-            return false;
-        }
-        if (isArray(this._autotranslate)) {
-            return (<string[]>this._autotranslate).length > 0;
-        }
-        return <boolean> this._autotranslate;
-    }
-
-    /**
-     * Whether to use autotranslate for a given language.
-     * @param lang language code.
-     */
-    public autotranslateLanguage(lang: string): boolean {
-        return this.autotranslatedLanguages().indexOf(lang) >= 0;
-    }
-
-    /**
-     * Return a list of languages to be autotranslated.
-     */
-    public autotranslatedLanguages(): string[] {
-        if (isNullOrUndefined(this._autotranslate) || this._autotranslate === false) {
-            return [];
-        }
-        if (isArray(this._autotranslate)) {
-            return (<string[]>this._autotranslate);
-        }
-        return this.languages().slice(1); // first is source language
-    }
-
-    /**
-     * API key to be used for Google Translate
-     * @return api key
-     */
-    public apikey(): string {
-        if (!isNullOrUndefined(this._apikey)) {
-            return this._apikey;
-        } else {
-            const apikeyPath = this.apikeyfile();
-            if (this.apikeyfile()) {
-                if (fs.existsSync(apikeyPath)) {
-                    return FileUtil.read(apikeyPath, 'utf-8');
-                } else {
-                    throw new Error(format('api key file not found: API_KEY_FILE=%s', apikeyPath));
-                }
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * file name for API key to be used for Google Translate.
-     * Explicitly set or read from env var API_KEY_FILE.
-     * @return file of api key
-     */
-    public apikeyfile(): string {
-        if (this._apikeyfile) {
-            return this._apikeyfile;
-        } else if (process.env.API_KEY_FILE) {
-            return process.env.API_KEY_FILE;
-        } else {
-            return null;
-        }
     }
 }
